@@ -24,7 +24,7 @@ const Navigation = ({ user }) => {
                         {/* Logo */}
                         <div className="flex-shrink-0 flex items-center">
                             <Link href="/dashboard">
-                                <ApplicationLogo className="block h-10 w-auto fill-current text-gray-600" />
+                                <ApplicationLogo className="block" />
                             </Link>
                         </div>
 
@@ -34,6 +34,21 @@ const Navigation = ({ user }) => {
                                 href="/dashboard"
                                 active={usePathname() === '/dashboard'}>
                                 Dashboard
+                            </NavLink>
+                            <NavLink
+                                href="/dashboard/users"
+                                active={usePathname() === '/users'}>
+                                Users
+                            </NavLink>
+                            <NavLink
+                                href="/dashboard/services"
+                                active={usePathname() === '/services'}>
+                                Services
+                            </NavLink>
+                            <NavLink
+                                href="/dashboard/counters"
+                                active={usePathname() === '/counters'}>
+                                Counters
                             </NavLink>
                         </div>
                     </div>

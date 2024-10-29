@@ -60,6 +60,7 @@ const Login = () => {
                         onChange={event => setEmail(event.target.value)}
                         required
                         autoFocus
+                        autoComplete="email"
                     />
 
                     <InputError messages={errors.email} className="mt-2" />
@@ -79,10 +80,7 @@ const Login = () => {
                         autoComplete="current-password"
                     />
 
-                    <InputError
-                        messages={errors.password}
-                        className="mt-2"
-                    />
+                    <InputError messages={errors.password} className="mt-2" />
                 </div>
 
                 {/* Remember Me */}
