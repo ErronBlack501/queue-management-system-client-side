@@ -11,11 +11,16 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.4.2",
+    "@nextui-org/react": "^2.4.8",
+    "@react-stately/data": "^3.11.7",
     "axios": "^0.21.1",
-    "next": "^15.0.1",
+    "dayjs": "^1.11.13",
+    "framer-motion": "^11.11.10",
+    "next": "^15.0.2",
     "react": "^18.3.1",
     "react-dom": "^18.2.0",
-    "swr": "^2.2.5"
+    "swr": "^2.2.5",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.12.1",

@@ -37,17 +37,21 @@ const Navigation = ({ user }) => {
                             </NavLink>
                             <NavLink
                                 href="/dashboard/users"
-                                active={usePathname() === '/users'}>
+                                active={usePathname() === '/dashboard/users'}>
                                 Users
                             </NavLink>
                             <NavLink
                                 href="/dashboard/services"
-                                active={usePathname() === '/services'}>
+                                active={
+                                    usePathname() === '/dashboard/services'
+                                }>
                                 Services
                             </NavLink>
                             <NavLink
                                 href="/dashboard/counters"
-                                active={usePathname() === '/counters'}>
+                                active={
+                                    usePathname() === '/dashboard/counters'
+                                }>
                                 Counters
                             </NavLink>
                         </div>
@@ -124,6 +128,21 @@ const Navigation = ({ user }) => {
                             href="/dashboard"
                             active={usePathname() === '/dashboard'}>
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href="/dashboard/users"
+                            active={usePathname() === '/users'}>
+                            Users
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href="/dashboard/services"
+                            active={usePathname() === '/services'}>
+                            Services
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href="/dashboard/counters"
+                            active={usePathname() === '/counters'}>
+                            Counters
                         </ResponsiveNavLink>
                     </div>
 
