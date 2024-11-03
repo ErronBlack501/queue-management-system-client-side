@@ -13,7 +13,10 @@ import {
     getKeyValue,
     Spinner,
     TableCell,
+    Button,
 } from '@nextui-org/react'
+import Link from 'next/link'
+import { PlusIcon } from '@/components/PlusIcon'
 
 const columns = [
     {
@@ -64,13 +67,28 @@ const Services = () => {
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
-                            Laravel - Services
                             <Table
-                                aria-label="Example table with services async pagination"
+                                aria-label="Table with services async pagination"
                                 isStriped
                                 isHeaderSticky
                                 selectedKeys={selectedKeys}
+                                selectionMode={'multiple'}
                                 onSelectionChange={setSelectedKeys}
+                                topContentPlacement={'outside'}
+                                topContent={
+                                    <div className="flex justify-end">
+                                        <Button
+                                            color="primary"
+                                            endContent={<PlusIcon />}>
+                                            <Link
+                                                href={
+                                                    '/dashboard/services/create'
+                                                }>
+                                                Add new
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                }
                                 bottomContent={
                                     !isLoading ? (
                                         <div className="flex w-full justify-center">
@@ -94,6 +112,7 @@ const Services = () => {
                                     )}
                                 </TableHeader>
                                 <TableBody
+                                    emptyContent={'No services found'}
                                     items={services?.data ?? []}
                                     isLoading={isLoading}
                                     loadingContent={

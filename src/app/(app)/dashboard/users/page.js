@@ -17,10 +17,10 @@ import {
     User,
     Pagination,
 } from '@nextui-org/react'
-import { PlusIcon } from './PlusIcon'
-import { VerticalDotsIcon } from './VerticalDotsIcon'
-import { SearchIcon } from './SearchIcon'
-import { ChevronDownIcon } from './ChevronDownIcon'
+import { PlusIcon } from '../../../../components/PlusIcon'
+import { VerticalDotsIcon } from '../../../../components/VerticalDotsIcon'
+import { SearchIcon } from '../../../../components/SearchIcon'
+import { ChevronDownIcon } from '../../../../components/ChevronDownIcon'
 import { columns, users, statusOptions } from './data'
 import { capitalize } from './utils'
 

@@ -2,13 +2,13 @@ import ApplicationLogo from '@/components/ApplicationLogo'
 import Dropdown from '@/components/Dropdown'
 import Link from 'next/link'
 import NavLink from '@/components/NavLink'
-import ResponsiveNavLink, {
-    ResponsiveNavButton,
-} from '@/components/ResponsiveNavLink'
+import { ResponsiveNavButton } from '@/components/ResponsiveNavLink'
 import { DropdownButton } from '@/components/DropdownLink'
 import { useAuth } from '@/hooks/auth'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import ResponsiveAdminNavigation from '@/components/ResponsiveAdminNavigation'
+import ResponsiveEmployeeNavigation from '@/components/ResponsiveEmployeeNavigation'
 
 const Navigation = ({ user }) => {
     const { logout } = useAuth()
@@ -35,25 +35,52 @@ const Navigation = ({ user }) => {
                                 active={usePathname() === '/dashboard'}>
                                 Dashboard
                             </NavLink>
-                            <NavLink
-                                href="/dashboard/users"
-                                active={usePathname() === '/dashboard/users'}>
-                                Users
-                            </NavLink>
-                            <NavLink
-                                href="/dashboard/services"
-                                active={
-                                    usePathname() === '/dashboard/services'
-                                }>
-                                Services
-                            </NavLink>
-                            <NavLink
-                                href="/dashboard/counters"
-                                active={
-                                    usePathname() === '/dashboard/counters'
-                                }>
-                                Counters
-                            </NavLink>
+                            {user?.role === 'admin' ? (
+                                <>
+                                    <NavLink
+                                        href="/dashboard/users"
+                                        active={
+                                            usePathname() === '/dashboard/users'
+                                        }>
+                                        Users
+                                    </NavLink>
+                                    <NavLink
+                                        href="/dashboard/services"
+                                        active={
+                                            usePathname() ===
+                                            '/dashboard/services'
+                                        }>
+                                        Services
+                                    </NavLink>
+                                    <NavLink
+                                        href="/dashboard/counters"
+                                        active={
+                                            usePathname() ===
+                                            '/dashboard/counters'
+                                        }>
+                                        Counters
+                                    </NavLink>
+                                </>
+                            ) : (
+                                <>
+                                    <NavLink
+                                        href="/dashboard/tickets"
+                                        active={
+                                            usePathname() ===
+                                            '/dashboard/tickets'
+                                        }>
+                                        Tickets
+                                    </NavLink>
+                                    <NavLink
+                                        href="/dashboard/ticketHistories"
+                                        active={
+                                            usePathname() ===
+                                            '/dashboard/ticketHistories'
+                                        }>
+                                        Ticket-Histories
+                                    </NavLink>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -124,26 +151,11 @@ const Navigation = ({ user }) => {
             {open && (
                 <div className="block sm:hidden">
                     <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink
-                            href="/dashboard"
-                            active={usePathname() === '/dashboard'}>
-                            Dashboard
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            href="/dashboard/users"
-                            active={usePathname() === '/users'}>
-                            Users
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            href="/dashboard/services"
-                            active={usePathname() === '/services'}>
-                            Services
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            href="/dashboard/counters"
-                            active={usePathname() === '/counters'}>
-                            Counters
-                        </ResponsiveNavLink>
+                        {user?.role === 'admin' ? (
+                            <ResponsiveAdminNavigation />
+                        ) : (
+                            <ResponsiveEmployeeNavigation />
+                        )}
                     </div>
 
                     {/* Responsive Settings Options */}
@@ -170,7 +182,7 @@ const Navigation = ({ user }) => {
                                     {user?.name}
                                 </div>
                                 <div className="font-medium text-sm text-gray-500">
-                                    {user?.email}
+                                    {user?.email + ` role: ${user?.role}`}
                                 </div>
                             </div>
                         </div>
