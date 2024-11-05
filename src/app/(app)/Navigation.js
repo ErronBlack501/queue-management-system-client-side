@@ -6,14 +6,38 @@ import { ResponsiveNavButton } from '@/components/ResponsiveNavLink'
 import { DropdownButton } from '@/components/DropdownLink'
 import { useAuth } from '@/hooks/auth'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ResponsiveAdminNavigation from '@/components/ResponsiveAdminNavigation'
 import ResponsiveEmployeeNavigation from '@/components/ResponsiveEmployeeNavigation'
+import echo from '@/hooks/echo'
+import { Bounce, toast } from 'react-toastify'
 
 const Navigation = ({ user }) => {
     const { logout } = useAuth()
-
     const [open, setOpen] = useState(false)
+    const notify = message =>
+        toast.success(message, {
+            position: 'bottom-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: 'light',
+            transition: Bounce,
+        })
+
+    useEffect(() => {
+        echo?.private(`service.created.${user.id}`).listen(
+            'ServiceCreatedEvent',
+            event => notify(event.message),
+        )
+        return () =>
+            echo
+                ?.private(`service.created.${user.id}`)
+                .stopListening('ServiceCreatedEvent')
+    }, [])
 
     return (
         <nav className="bg-white border-b border-gray-100">

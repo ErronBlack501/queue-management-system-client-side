@@ -1,7 +1,7 @@
 import { Nunito } from 'next/font/google'
-import {SWRConfig} from 'swr'
 import { NextUIProvider } from '@nextui-org/react'
 import '@/app/global.css'
+import ToastProvider from '@/components/ToastProvider'
 
 const nunitoFont = Nunito({
     subsets: ['latin'],
@@ -12,7 +12,9 @@ const RootLayout = ({ children }) => {
     return (
         <html lang="en" className={`light ${nunitoFont.className}`}>
             <body className="antialiased">
-                <NextUIProvider>{children}</NextUIProvider>
+                <ToastProvider>
+                    <NextUIProvider>{children}</NextUIProvider>
+                </ToastProvider>
             </body>
         </html>
     )

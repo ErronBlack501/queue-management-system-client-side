@@ -2,7 +2,7 @@
 import Header from '@/app/(app)/Header'
 import { axios } from '@/lib/axios'
 import useSWR from 'swr'
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     Table,
     TableHeader,
@@ -55,6 +55,10 @@ const Counters = () => {
     )
 
     if (error) return <div>{error.message}</div>
+
+    useEffect(() => {
+
+    }, [])
 
     return (
         <>
