@@ -1,3 +1,5 @@
+'use client'
+
 import ApplicationLogo from '@/components/ApplicationLogo'
 import Dropdown from '@/components/Dropdown'
 import Link from 'next/link'
@@ -5,42 +7,43 @@ import NavLink from '@/components/NavLink'
 import { ResponsiveNavButton } from '@/components/ResponsiveNavLink'
 import { DropdownButton } from '@/components/DropdownLink'
 import { useAuth } from '@/hooks/auth'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import ResponsiveAdminNavigation from '@/components/ResponsiveAdminNavigation'
 import ResponsiveEmployeeNavigation from '@/components/ResponsiveEmployeeNavigation'
-import echo from '@/hooks/echo'
-import { Bounce, toast } from 'react-toastify'
+import { Avatar, Badge } from '@nextui-org/react'
+import NotificationIcon from '@/components/NotificationIcon'
+import { showToast } from '@/utils/toastHelper'
+import { useEcho } from '@/hooks/echo'
 
 const Navigation = ({ user }) => {
     const { logout } = useAuth()
+    const echo = useEcho()
+    const router = useRouter()
     const [open, setOpen] = useState(false)
-    const notify = message =>
-        toast.success(message, {
-            position: 'bottom-right',
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: 'light',
-            transition: Bounce,
-        })
 
     useEffect(() => {
-        echo?.private(`service.created.${user.id}`).listen(
-            'ServiceCreatedEvent',
-            event => notify(event.message),
-        )
-        return () =>
-            echo
-                ?.private(`service.created.${user.id}`)
-                .stopListening('ServiceCreatedEvent')
-    }, [])
+        if (echo) {
+            if (user.role === 'employee') {
+                const channel = echo?.join(`service.${user.counter.service_id}`)
+                channel
+                    .here(users => {
+                        console.log('connected users : ', users)
+                    })
+                    .joining(user => {
+                        showToast('info', `${user.name} is joining...`)
+                    })
+                    .leaving(() => {
+                        console.log(
+                            `leaving...${user.name} with id: ${user.id}`,
+                        )
+                    })
+            }
+        }
+    }, [echo])
 
     return (
-        <nav className="bg-white border-b border-gray-100">
+        <nav className="sticky top-0 z-10 bg-white bg-opacity-30 backdrop-blur-lg border-b border-gray-100">
             {/* Primary Navigation Menu */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
@@ -62,11 +65,12 @@ const Navigation = ({ user }) => {
                             {user?.role === 'admin' ? (
                                 <>
                                     <NavLink
-                                        href="/dashboard/users"
+                                        href="/dashboard/employees"
                                         active={
-                                            usePathname() === '/dashboard/users'
+                                            usePathname() ===
+                                            '/dashboard/employees'
                                         }>
-                                        Users
+                                        Employees
                                     </NavLink>
                                     <NavLink
                                         href="/dashboard/services"
@@ -84,16 +88,32 @@ const Navigation = ({ user }) => {
                                         }>
                                         Counters
                                     </NavLink>
+                                    <NavLink
+                                        href="/dashboard/distributor"
+                                        active={
+                                            usePathname() ===
+                                            '/dashboard/distributor'
+                                        }>
+                                        Ticket's distributor
+                                    </NavLink>
+                                    <NavLink
+                                        href="/dashboard/waiting-list"
+                                        active={
+                                            usePathname() ===
+                                            '/dashboard/waiting-list'
+                                        }>
+                                        Waiting list
+                                    </NavLink>
                                 </>
                             ) : (
                                 <>
                                     <NavLink
-                                        href="/dashboard/tickets"
+                                        href="/dashboard/pending-tickets"
                                         active={
                                             usePathname() ===
-                                            '/dashboard/tickets'
+                                            '/dashboard/pending-tickets'
                                         }>
-                                        Tickets
+                                        Pending Tickets
                                     </NavLink>
                                     <NavLink
                                         href="/dashboard/ticketHistories"
@@ -110,28 +130,38 @@ const Navigation = ({ user }) => {
 
                     {/* Settings Dropdown */}
                     <div className="hidden sm:flex sm:items-center sm:ml-6">
+                        <NotificationIcon classname="mr-5" />
+                        <div className="flex flex-col justify-center items-start text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out">
+                            <div className="text-gray-950">{user?.name}</div>
+                            <div>{user?.role}</div>
+                        </div>
                         <Dropdown
                             align="right"
                             width="48"
                             trigger={
-                                <button className="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out">
-                                    <div>{user?.name}</div>
-
-                                    <div className="ml-1">
-                                        <svg
-                                            className="fill-current h-4 w-4"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 20 20">
-                                            <path
-                                                fillRule="evenodd"
-                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                clipRule="evenodd"
+                                <button className="flex items-center">
+                                    <div className="mx-2">
+                                        <Badge
+                                            content=""
+                                            color="success"
+                                            shape="circle"
+                                            placement="bottom-right">
+                                            <Avatar
+                                                className="ml-2"
+                                                isBordered
+                                                name={user?.name}
                                             />
-                                        </svg>
+                                        </Badge>
                                     </div>
                                 </button>
                             }>
                             {/* Authentication */}
+                            <DropdownButton
+                                onClick={() =>
+                                    router.push('/dashboard/profile')
+                                }>
+                                Profile
+                            </DropdownButton>
                             <DropdownButton onClick={logout}>
                                 Logout
                             </DropdownButton>

@@ -6,11 +6,12 @@ import { RadioGroup, Radio, Textarea, Input, Button } from '@nextui-org/react'
 import { useRouter } from 'next/navigation'
 import { axios } from '@/lib/axios'
 import InputError from '@/components/InputError'
+import { showToast } from '@/utils/toastHelper'
 
 const CreatePage = () => {
     const router = useRouter()
     const [serviceName, setServiceName] = useState('')
-    const [notValide, setNotValide] = useState(false)
+    const [notValide, setnotValide] = useState(false)
     const [serviceDescription, setServiceDescription] = useState('')
     const [isActive, setIsActive] = useState('true')
     const [errors, setErrors] = useState([])
@@ -29,14 +30,21 @@ const CreatePage = () => {
         }
 
         setErrors([])
+        setnotValide(false)
 
         axios
             .post('/api/v1/services', data)
-            .then(() => router.back())
+            .then(() => {
+                showToast(
+                    'success',
+                    'The service has been created successfully.',
+                )
+                router.back()
+            })
             .catch(error => {
                 if (error.response.status !== 422) throw error
                 setErrors(error.response.data.errors)
-                setNotValide(true)
+                setnotValide(true)
             })
     }
 

@@ -1,4 +1,5 @@
 'use client'
+
 import Header from '@/app/(app)/Header'
 import { axios } from '@/lib/axios'
 import useSWR from 'swr'
@@ -34,18 +35,17 @@ import Link from 'next/link'
 import { showToast } from '@/utils/toastHelper'
 
 const columns = [
-    { uid: 'id', name: 'ID COUNTER' },
+    { uid: 'id', name: 'ID EMPLOYEE' },
+    { uid: 'name', name: 'EMPLOYEE NAME' },
+    { uid: 'email', name: 'EMPLOYEE EMAIL' },
     { uid: 'counterNumber', name: 'COUNTER NUMBER' },
-    { uid: 'counterStatus', name: 'COUNTER STATUS' },
-    { uid: 'service', name: 'SERVICE NAME' },
-    { uid: 'user', name: 'EMPLOYEE' },
     { uid: 'createdAt', name: 'CREATED AT' },
     { uid: 'updatedAt', name: 'UPDATED AT' },
     { uid: 'actions', name: 'ACTIONS' },
 ]
 
-const Counters = () => {
-    const [selectedCounter, setSelectedCounter] = useState(null)
+const Employees = () => {
+    const [selectedUser, setSelectedUser] = useState(null)
     const [errors, setErrors] = useState([])
     const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure()
     const [selectedKeys, setSelectedKeys] = useState(new Set([]))
@@ -55,13 +55,13 @@ const Counters = () => {
         'text-xl text-default-500 pointer-events-none flex-shrink-0'
 
     const {
-        data: counters,
+        data: users,
         mutate,
         error,
         isLoading,
-    } = useSWR(`/api/v1/counters?page=${page}`, () =>
+    } = useSWR(`/api/v1/users?page=${page}`, () =>
         axios
-            .get(`/api/v1/counters?page=${page}`)
+            .get(`/api/v1/users?page=${page}`)
             .then(res => res.data)
             .catch(error => {
                 if (error.response.status !== 409) throw error
@@ -71,14 +71,14 @@ const Counters = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')
 
     const onDispose = () => {
-        setSelectedCounter(null)
+        setSelectedUser(null)
         setModalPurpose('')
         onClose()
     }
 
-    const openModalWithPurpose = (purpose, counter = null) => {
+    const openModalWithPurpose = (purpose, user = null) => {
         setModalPurpose(purpose)
-        setSelectedCounter(counter)
+        setSelectedUser(user)
         onOpen()
     }
 
@@ -86,12 +86,12 @@ const Counters = () => {
     const onDelete = async () => {
         await csrf()
         axios
-            .delete(`/api/v1/counters/${selectedCounter.id}`)
+            .delete(`/api/v1/users/${selectedUser.id}`)
             .then(() => {
                 mutate()
                 showToast(
                     'success',
-                    'The counter has been deleted successfully.',
+                    'The user has been deleted successfully.',
                 )
                 onDispose()
             })
@@ -108,27 +108,23 @@ const Counters = () => {
                 return (
                     <>
                         <ModalHeader className="flex flex-col gap-1">
-                            Counter Details
+                            Employee Details
                         </ModalHeader>
                         <ModalBody>
-                            <p>{selectedCounter.id}</p>
-                            <p>{selectedCounter.counterNumber}</p>
-                            <p>{selectedCounter.counterStatus}</p>
-                            <h1>Belongs to: </h1>
-                            <p>{selectedCounter.service.id}</p>
-                            <p>{selectedCounter.service.serviceName}</p>
-                            <p>{selectedCounter.service.serviceDescription}</p>
-                            <p>{selectedCounter.user.id}</p>
-                            <p>{selectedCounter.user.name}</p>
-                            <p>{selectedCounter.user.role}</p>
+                            <p>{selectedUser.id}</p>
+                            <p>{selectedUser.name}</p>
+                            <p>{selectedUser.email}</p>
+                            <h1>Works at counter number: </h1>
+                            <p>{selectedUser.counterNumber}</p>
+                            <p>{selectedUser.role}</p>
                             <div>
                                 <div className="text-center">
-                                    {dayjs(selectedCounter.createdAt).format(
+                                    {dayjs(selectedUser.createdAt).format(
                                         'DD MMM YYYY HH:mm:ss',
                                     )}
                                 </div>
                                 <div className="text-center">
-                                    {dayjs(selectedCounter.updatedAt).format(
+                                    {dayjs(selectedUser.updatedAt).format(
                                         'DD MMM YYYY HH:mm:ss',
                                     )}
                                 </div>
@@ -155,8 +151,8 @@ const Counters = () => {
                         </ModalHeader>
                         <ModalBody>
                             <p>
-                                Are you sure you want to delete this counter"
-                                {selectedCounter?.counterNumber}"?
+                                Are you sure you want to delete this user"
+                                {selectedUser?.userNumber}"?
                             </p>
                             <p>This action cannot be undone.</p>
                         </ModalBody>
@@ -176,22 +172,20 @@ const Counters = () => {
         }
     }
 
-    const renderCell = React.useCallback((counter, columnKey) => {
-        const cellValue = counter[columnKey]
+    const renderCell = React.useCallback((user, columnKey) => {
+        const cellValue = user[columnKey]
 
         switch (columnKey) {
             case 'id':
                 return <div className="text-center">{cellValue}</div>
+            case 'name':
+                return <div>{cellValue}</div>
+            case 'email':
+                return <div>{cellValue}</div>
             case 'counterNumber':
-                return <div className="text-center">{cellValue}</div>
-            case 'counterStatus':
-                return <div className="text-center">{cellValue}</div>
-            case 'service':
                 return (
-                    <div className="text-center">{cellValue.serviceName}</div>
+                    <div className="text-center">{cellValue}</div>
                 )
-            case 'user':
-                return <div>{cellValue.name}</div>
             case 'createdAt':
             case 'updatedAt':
                 return (
@@ -217,7 +211,7 @@ const Counters = () => {
                                     onClick={() =>
                                         openModalWithPurpose(
                                             'viewForm',
-                                            counter,
+                                            user,
                                         )
                                     }>
                                     View
@@ -237,7 +231,7 @@ const Counters = () => {
                                     onClick={() =>
                                         openModalWithPurpose(
                                             'deleteForm',
-                                            counter,
+                                            user,
                                         )
                                     }>
                                     Delete
@@ -255,7 +249,7 @@ const Counters = () => {
 
     return (
         <>
-            <Header title="Counters" />
+            <Header title="Employees" />
             <div className="py-8">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -288,7 +282,7 @@ const Counters = () => {
                                                 color="primary"
                                                 page={page}
                                                 total={
-                                                    counters?.meta?.last_page ||
+                                                    users?.meta?.last_page ||
                                                     1
                                                 }
                                                 onChange={setPage}
@@ -311,7 +305,7 @@ const Counters = () => {
                                 </TableHeader>
                                 <TableBody
                                     emptyContent="No services found"
-                                    items={counters?.data ?? []}
+                                    items={users?.data ?? []}
                                     isLoading={isLoading}
                                     loadingContent={
                                         <Spinner label="Loading..." />
@@ -338,7 +332,7 @@ const Counters = () => {
             <Modal
                 isOpen={isOpen}
                 onOpenChange={() => {
-                    setSelectedCounter(null)
+                    setSelectedUser(null)
                     onOpenChange()
                 }}>
                 <ModalContent>{renderModalContent()}</ModalContent>
@@ -347,4 +341,4 @@ const Counters = () => {
     )
 }
 
-export default Counters
+export default Employees

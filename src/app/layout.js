@@ -1,16 +1,16 @@
-import { Nunito } from 'next/font/google'
+import { Montserrat } from 'next/font/google'
 import { NextUIProvider } from '@nextui-org/react'
 import '@/app/global.css'
 import ToastProvider from '@/components/ToastProvider'
 
-const nunitoFont = Nunito({
+const montSerratFont = Montserrat({
     subsets: ['latin'],
     display: 'swap',
 })
 
 const RootLayout = ({ children }) => {
     return (
-        <html lang="en" className={`light ${nunitoFont.className}`}>
+        <html lang="en" className={`light ${montSerratFont.className}`}>
             <body className="antialiased">
                 <ToastProvider>
                     <NextUIProvider>{children}</NextUIProvider>

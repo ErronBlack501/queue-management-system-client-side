@@ -2,7 +2,8 @@
 import Header from '@/app/(app)/Header'
 import { axios } from '@/lib/axios'
 import useSWR from 'swr'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import qs from 'qs'
 import {
     Table,
     TableHeader,
@@ -18,88 +19,114 @@ import {
     DropdownMenu,
     DropdownItem,
     Modal,
-    cn,
     useDisclosure,
     ModalContent,
     ModalHeader,
     ModalBody,
     ModalFooter,
 } from '@nextui-org/react'
-import { PlusIcon } from '@/components/PlusIcon'
 import dayjs from 'dayjs'
 import { EyeIcon } from '@/components/EyeIcon'
-import { DeleteDocumentIcon } from '@/components/DeleteDocumentIcon'
 import { VerticalDotsIcon } from '@/components/VerticalDotsIcon'
-import Link from 'next/link'
 import { showToast } from '@/utils/toastHelper'
+import { useEcho } from '@/hooks/echo'
+import { useAuth } from '@/hooks/auth'
 
 const columns = [
-    { uid: 'id', name: 'ID COUNTER' },
-    { uid: 'counterNumber', name: 'COUNTER NUMBER' },
-    { uid: 'counterStatus', name: 'COUNTER STATUS' },
+    { uid: 'id', name: 'ID TICKETS' },
+    { uid: 'ticket_number', name: 'TICKET NUMBER' },
+    { uid: 'ticket_status', name: 'TICKET STATUS' },
     { uid: 'service', name: 'SERVICE NAME' },
-    { uid: 'user', name: 'EMPLOYEE' },
-    { uid: 'createdAt', name: 'CREATED AT' },
-    { uid: 'updatedAt', name: 'UPDATED AT' },
+    { uid: 'counter', name: 'COUNTER NUMBER' },
+    { uid: 'created_at', name: 'CREATED AT' },
+    { uid: 'updated_at', name: 'UPDATED AT' },
     { uid: 'actions', name: 'ACTIONS' },
 ]
 
-const Counters = () => {
-    const [selectedCounter, setSelectedCounter] = useState(null)
-    const [errors, setErrors] = useState([])
+const Tickets = () => {
+    const { user } = useAuth()
+    const [selectedTicket, setSelectedTicket] = useState(null)
     const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure()
     const [selectedKeys, setSelectedKeys] = useState(new Set([]))
     const [page, setPage] = useState(1)
     const [modalPurpose, setModalPurpose] = useState('')
+    const query = qs.stringify(
+        {
+            filters: {
+                $and: [
+                    {
+                        counter_id: {
+                            $eq: user.counter.id,
+                        },
+                    },
+                    {
+                        service_id: {
+                            $eq: user.counter.service_id,
+                        },
+                    },
+                    {
+                        ticket_status: {
+                            $eq: 'waiting',
+                        },
+                    },
+                ],
+            },
+        },
+        { encodeValuesOnly: true },
+    )
+    const echo = useEcho()
     const iconClasses =
         'text-xl text-default-500 pointer-events-none flex-shrink-0'
 
     const {
-        data: counters,
+        data: response,
         mutate,
         error,
         isLoading,
-    } = useSWR(`/api/v1/counters?page=${page}`, () =>
+    } = useSWR(`/api/v1/tickets?${query}&page=${page}`, () =>
         axios
-            .get(`/api/v1/counters?page=${page}`)
+            .get(`/api/v1/tickets?${query}&page=${page}`)
             .then(res => res.data)
             .catch(error => {
                 if (error.response.status !== 409) throw error
             }),
     )
 
-    const csrf = () => axios.get('/sanctum/csrf-cookie')
+    const nowServingTicketNumber = response?.nowServing?.ticket_number
+    const firstTicketNumber = response?.tickets?.data[0]?.ticket_number
+    const isDisabled =
+        !nowServingTicketNumber || nowServingTicketNumber !== firstTicketNumber
+
+    useEffect(() => {
+        if (echo) {
+            echo.private('notifications').listen(
+                'TicketCreatedEvent',
+                ({ service_id, counter_id }) => {
+                    if (
+                        service_id === user.counter.service_id &&
+                        counter_id === user.counter.id
+                    ) {
+                        showToast(
+                            'success',
+                            'A new ticket has been assigned to you.',
+                        )
+                        mutate()
+                    }
+                },
+            )
+        }
+    }, [echo])
 
     const onDispose = () => {
-        setSelectedCounter(null)
+        setSelectedTicket(null)
         setModalPurpose('')
         onClose()
     }
 
-    const openModalWithPurpose = (purpose, counter = null) => {
+    const openModalWithPurpose = (purpose, ticket = null) => {
         setModalPurpose(purpose)
-        setSelectedCounter(counter)
+        setSelectedTicket(ticket)
         onOpen()
-    }
-
-
-    const onDelete = async () => {
-        await csrf()
-        axios
-            .delete(`/api/v1/counters/${selectedCounter.id}`)
-            .then(() => {
-                mutate()
-                showToast(
-                    'success',
-                    'The counter has been deleted successfully.',
-                )
-                onDispose()
-            })
-            .catch(error => {
-                if (error.response.status !== 422) throw error
-                setErrors(error.response.data.errors)
-                showToast('error', errors?.message)
-            })
     }
 
     const renderModalContent = () => {
@@ -108,27 +135,27 @@ const Counters = () => {
                 return (
                     <>
                         <ModalHeader className="flex flex-col gap-1">
-                            Counter Details
+                            Ticket Details
                         </ModalHeader>
                         <ModalBody>
-                            <p>{selectedCounter.id}</p>
-                            <p>{selectedCounter.counterNumber}</p>
-                            <p>{selectedCounter.counterStatus}</p>
+                            <p>{selectedTicket.id}</p>
+                            <p>{selectedTicket.ticketNumber}</p>
+                            <p>{selectedTicket.ticketStatus}</p>
                             <h1>Belongs to: </h1>
-                            <p>{selectedCounter.service.id}</p>
-                            <p>{selectedCounter.service.serviceName}</p>
-                            <p>{selectedCounter.service.serviceDescription}</p>
-                            <p>{selectedCounter.user.id}</p>
-                            <p>{selectedCounter.user.name}</p>
-                            <p>{selectedCounter.user.role}</p>
+                            <p>{selectedTicket.service.id}</p>
+                            <p>{selectedTicket.service.serviceName}</p>
+                            <p>{selectedTicket.service.serviceDescription}</p>
+                            <p>{selectedTicket.user.id}</p>
+                            <p>{selectedTicket.user.name}</p>
+                            <p>{selectedTicket.user.role}</p>
                             <div>
                                 <div className="text-center">
-                                    {dayjs(selectedCounter.createdAt).format(
+                                    {dayjs(selectedTicket.createdAt).format(
                                         'DD MMM YYYY HH:mm:ss',
                                     )}
                                 </div>
                                 <div className="text-center">
-                                    {dayjs(selectedCounter.updatedAt).format(
+                                    {dayjs(selectedTicket.updatedAt).format(
                                         'DD MMM YYYY HH:mm:ss',
                                     )}
                                 </div>
@@ -147,53 +174,33 @@ const Counters = () => {
                         </ModalFooter>
                     </>
                 )
-            case 'deleteForm':
-                return (
-                    <>
-                        <ModalHeader className="flex flex-col gap-1">
-                            Delete Service
-                        </ModalHeader>
-                        <ModalBody>
-                            <p>
-                                Are you sure you want to delete this counter"
-                                {selectedCounter?.counterNumber}"?
-                            </p>
-                            <p>This action cannot be undone.</p>
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="primary" onPress={onDispose}>
-                                Cancel
-                            </Button>
-                            <Button color="danger" onPress={onDelete}>
-                                Delete
-                            </Button>
-                        </ModalFooter>
-                    </>
-                )
-
             default:
                 return null
         }
     }
 
-    const renderCell = React.useCallback((counter, columnKey) => {
-        const cellValue = counter[columnKey]
+    const renderCell = React.useCallback((ticket, columnKey) => {
+        const cellValue = ticket[columnKey]
 
         switch (columnKey) {
             case 'id':
                 return <div className="text-center">{cellValue}</div>
-            case 'counterNumber':
+            case 'ticket_number':
                 return <div className="text-center">{cellValue}</div>
-            case 'counterStatus':
+            case 'ticket_status':
                 return <div className="text-center">{cellValue}</div>
             case 'service':
                 return (
-                    <div className="text-center">{cellValue.serviceName}</div>
+                    <div className="text-center">{cellValue.service_name}</div>
                 )
-            case 'user':
-                return <div>{cellValue.name}</div>
-            case 'createdAt':
-            case 'updatedAt':
+            case 'counter':
+                return (
+                    <div className="text-center">
+                        {cellValue.counter_number}
+                    </div>
+                )
+            case 'created_at':
+            case 'updated_at':
                 return (
                     <div className="text-center">
                         {dayjs(cellValue).format('DD MMM YYYY HH:mm:ss')}
@@ -215,32 +222,9 @@ const Counters = () => {
                                         <EyeIcon className={iconClasses} />
                                     }
                                     onClick={() =>
-                                        openModalWithPurpose(
-                                            'viewForm',
-                                            counter,
-                                        )
+                                        openModalWithPurpose('viewForm', ticket)
                                     }>
                                     View
-                                </DropdownItem>
-                                <DropdownItem
-                                    key="delete"
-                                    className="text-danger"
-                                    color="danger"
-                                    startContent={
-                                        <DeleteDocumentIcon
-                                            className={cn(
-                                                iconClasses,
-                                                'text-danger',
-                                            )}
-                                        />
-                                    }
-                                    onClick={() =>
-                                        openModalWithPurpose(
-                                            'deleteForm',
-                                            counter,
-                                        )
-                                    }>
-                                    Delete
                                 </DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
@@ -255,7 +239,7 @@ const Counters = () => {
 
     return (
         <>
-            <Header title="Counters" />
+            <Header title="Tickets" />
             <div className="py-8">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -269,12 +253,18 @@ const Counters = () => {
                                 onSelectionChange={setSelectedKeys}
                                 topContentPlacement="outside"
                                 topContent={
-                                    <div className="flex justify-end">
+                                    <div className="flex justify-between">
+                                        <div>
+                                            Now serving ticket:{' '}
+                                            {
+                                                response?.nowServing
+                                                    ?.ticket_number
+                                            }
+                                        </div>
                                         <Button
                                             color="primary"
-                                            isDisabled
-                                            endContent={<PlusIcon />}>
-                                            <Link href="#">Add new</Link>
+                                            isDisabled={isDisabled}>
+                                            Serve
                                         </Button>
                                     </div>
                                 }
@@ -288,8 +278,8 @@ const Counters = () => {
                                                 color="primary"
                                                 page={page}
                                                 total={
-                                                    counters?.meta?.last_page ||
-                                                    1
+                                                    response?.tickets
+                                                        ?.last_page || 1
                                                 }
                                                 onChange={setPage}
                                             />
@@ -300,18 +290,14 @@ const Counters = () => {
                                     {column => (
                                         <TableColumn
                                             key={column.uid}
-                                            align={
-                                                column.uid === 'actions'
-                                                    ? 'center'
-                                                    : 'start'
-                                            }>
+                                            align="center">
                                             {column.name}
                                         </TableColumn>
                                     )}
                                 </TableHeader>
                                 <TableBody
-                                    emptyContent="No services found"
-                                    items={counters?.data ?? []}
+                                    emptyContent="You don't have any tickets assigned to you at the moment"
+                                    items={response?.tickets?.data ?? []}
                                     isLoading={isLoading}
                                     loadingContent={
                                         <Spinner label="Loading..." />
@@ -338,7 +324,7 @@ const Counters = () => {
             <Modal
                 isOpen={isOpen}
                 onOpenChange={() => {
-                    setSelectedCounter(null)
+                    setSelectedTicket(null)
                     onOpenChange()
                 }}>
                 <ModalContent>{renderModalContent()}</ModalContent>
@@ -347,4 +333,4 @@ const Counters = () => {
     )
 }
 
-export default Counters
+export default Tickets

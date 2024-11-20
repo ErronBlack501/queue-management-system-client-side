@@ -10,7 +10,7 @@ const ResponsiveAdminNavigation = () => {
             </ResponsiveNavLink>
             <ResponsiveNavLink
                 href="/dashboard/users"
-                active={usePathname() === '/users'}>
+                active={usePathname() === '/employees'}>
                 Users
             </ResponsiveNavLink>
             <ResponsiveNavLink
