@@ -24,6 +24,7 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
+    Progress,
 } from '@nextui-org/react'
 import dayjs from 'dayjs'
 import { EyeIcon } from '@/components/EyeIcon'
@@ -60,11 +61,6 @@ const Tickets = () => {
                         },
                     },
                     {
-                        service_id: {
-                            $eq: user.counter.service_id,
-                        },
-                    },
-                    {
                         ticket_status: {
                             $eq: 'waiting',
                         },
@@ -93,9 +89,10 @@ const Tickets = () => {
     )
 
     const nowServingTicketNumber = response?.nowServing?.ticket_number
-    const firstTicketNumber = response?.tickets?.data[0]?.ticket_number
+    const firstTicketNumber = response?.tickets?.data[0]
     const isDisabled =
-        !nowServingTicketNumber || nowServingTicketNumber !== firstTicketNumber
+        !nowServingTicketNumber ||
+        nowServingTicketNumber !== firstTicketNumber?.ticket_number
 
     useEffect(() => {
         if (echo) {
@@ -116,6 +113,38 @@ const Tickets = () => {
             )
         }
     }, [echo])
+
+    const csrf = () => axios.get('/sanctum/csrf-cookie')
+
+    const updateState = async ticketData => {
+        await csrf()
+        axios
+            .patch(`/api/v1/tickets/${response?.nowServing?.id}`, ticketData)
+            .then(() => {
+                showToast(
+                    'success',
+                    'The ticket state has been updated successfully.',
+                )
+            })
+            .catch(error => {
+                if (error.response.status !== 422) throw error
+                showToast('error', error.response.data.errors)
+            })
+    }
+
+    const lPop = async () => {
+        await csrf()
+        axios
+            .delete('/api/v1/queue/pop-first')
+            .then(() => {
+                mutate()
+                onDispose()
+            })
+            .catch(error => {
+                if (error.response.status !== 422) throw error
+                showToast('error', error?.message)
+            })
+    }
 
     const onDispose = () => {
         setSelectedTicket(null)
@@ -174,6 +203,50 @@ const Tickets = () => {
                         </ModalFooter>
                     </>
                 )
+            case 'servingForm':
+                return (
+                    <>
+                        <ModalHeader className="flex flex-col gap-1">
+                            Serving ticket:{selectedTicket?.ticket_number}
+                        </ModalHeader>
+                        <ModalBody>
+                            {' '}
+                            <Progress
+                                size="sm"
+                                isIndeterminate
+                                aria-label="Loading..."
+                                className="max-w-md"
+                            />
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button
+                                color="danger"
+                                onClick={async () => {
+                                    await updateState({
+                                        ticketStatus: 'canceled',
+                                        canceledAt: dayjs().format(),
+                                    })
+                                    await lPop()
+                                    onDispose()
+                                }}>
+                                Cancel
+                            </Button>
+                            <Button
+                                color="primary"
+                                onClick={async () => {
+                                    await updateState({
+                                        ticketStatus: 'completed',
+                                        completedAt: dayjs().format(),
+                                    })
+                                    await lPop()
+                                    onDispose()
+                                }}>
+                                Complete
+                            </Button>
+                        </ModalFooter>
+                    </>
+                )
+
             default:
                 return null
         }
@@ -253,7 +326,7 @@ const Tickets = () => {
                                 onSelectionChange={setSelectedKeys}
                                 topContentPlacement="outside"
                                 topContent={
-                                    <div className="flex justify-between">
+                                    <div className="flex justify-between items-center">
                                         <div>
                                             Now serving ticket:{' '}
                                             {
@@ -261,8 +334,23 @@ const Tickets = () => {
                                                     ?.ticket_number
                                             }
                                         </div>
+                                        <div>
+                                            Counter status:{' '}
+                                            {user.counter.counter_status}
+                                        </div>
                                         <Button
                                             color="primary"
+                                            onClick={async () => {
+                                                updateState({
+                                                    processedAt:
+                                                        dayjs().format(),
+                                                })
+
+                                                openModalWithPurpose(
+                                                    'servingForm',
+                                                    firstTicketNumber,
+                                                )
+                                            }}
                                             isDisabled={isDisabled}>
                                             Serve
                                         </Button>
@@ -322,6 +410,9 @@ const Tickets = () => {
             </div>
 
             <Modal
+                hideCloseButton
+                isKeyboardDismissDisabled={true}
+                isDismissable={false}
                 isOpen={isOpen}
                 onOpenChange={() => {
                     setSelectedTicket(null)

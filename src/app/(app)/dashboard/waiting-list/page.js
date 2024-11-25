@@ -29,6 +29,9 @@ const WaitingList = () => {
             echo.private('notifications').listen('TicketCreatedEvent', () => {
                 showToast('success', 'A new ticket has been created.')
                 mutate()
+            }).listen('TicketHandledEvent', () => {
+                showToast('success', 'Waiting list updated.')
+                mutate()
             })
         }
     }, [echo])
