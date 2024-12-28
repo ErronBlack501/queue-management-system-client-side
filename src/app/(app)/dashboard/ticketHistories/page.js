@@ -33,7 +33,7 @@ import { VerticalDotsIcon } from '@/components/VerticalDotsIcon'
 import { useAuth } from '@/hooks/auth'
 
 const columns = [
-    { uid: 'id', name: 'ID TICKETS' },
+    { uid: 'id', name: 'CODE TICKET' },
     { uid: 'ticket_number', name: 'TICKET NUMBER' },
     { uid: 'ticket_status', name: 'TICKET STATUS' },
     { uid: 'processed_at', name: 'PROCESSED AT' },

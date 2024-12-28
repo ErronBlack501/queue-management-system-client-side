@@ -34,7 +34,7 @@ import { useEcho } from '@/hooks/echo'
 import { useAuth } from '@/hooks/auth'
 
 const columns = [
-    { uid: 'id', name: 'ID TICKETS' },
+    { uid: 'id', name: 'CODE TICKET' },
     { uid: 'ticket_number', name: 'TICKET NUMBER' },
     { uid: 'ticket_status', name: 'TICKET STATUS' },
     { uid: 'service', name: 'SERVICE NAME' },
@@ -220,18 +220,6 @@ const Tickets = () => {
                         </ModalBody>
                         <ModalFooter>
                             <Button
-                                color="danger"
-                                onClick={async () => {
-                                    await updateState({
-                                        ticketStatus: 'canceled',
-                                        canceledAt: dayjs().format(),
-                                    })
-                                    await lPop()
-                                    onDispose()
-                                }}>
-                                Cancel
-                            </Button>
-                            <Button
                                 color="primary"
                                 onClick={async () => {
                                     await updateState({
@@ -339,11 +327,27 @@ const Tickets = () => {
                                             {user.counter.counter_status}
                                         </div>
                                         <Button
+                                            color="secondary"
+                                            isDisabled={isDisabled}>
+                                            Call
+                                        </Button>
+                                        <Button
+                                            color="danger"
+                                            onClick={async () => {
+                                                await updateState({
+                                                    ticketStatus: 'canceled',
+                                                    canceledAt: dayjs().format(),
+                                                })
+                                                await lPop()
+                                            }}
+                                            isDisabled={isDisabled}>
+                                            Cancel
+                                        </Button>
+                                        <Button
                                             color="primary"
                                             onClick={async () => {
-                                                updateState({
-                                                    processedAt:
-                                                        dayjs().format(),
+                                                await updateState({
+                                                    processedAt: dayjs().format(),
                                                 })
 
                                                 openModalWithPurpose(

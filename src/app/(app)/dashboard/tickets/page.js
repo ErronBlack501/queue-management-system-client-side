@@ -33,7 +33,7 @@ import { showToast } from '@/utils/toastHelper'
 import { useEcho } from '@/hooks/echo'
 
 const columns = [
-    { uid: 'id', name: 'ID TICKETS' },
+    { uid: 'id', name: 'CODE TICKET' },
     { uid: 'ticketNumber', name: 'TICKET NUMBER' },
     { uid: 'ticketStatus', name: 'TICKET STATUS' },
     { uid: 'service', name: 'SERVICE NAME' },

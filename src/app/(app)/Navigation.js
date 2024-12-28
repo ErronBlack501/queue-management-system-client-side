@@ -27,16 +27,8 @@ const Navigation = ({ user }) => {
             if (user.role === 'employee') {
                 const channel = echo?.join(`service.${user.counter.service_id}`)
                 channel
-                    .here(users => {
-                        console.log('connected users : ', users)
-                    })
                     .joining(user => {
                         showToast('info', `${user.name} is joining...`)
-                    })
-                    .leaving(() => {
-                        console.log(
-                            `leaving...${user.name} with id: ${user.id}`,
-                        )
                     })
             }
         }
@@ -87,22 +79,6 @@ const Navigation = ({ user }) => {
                                             '/dashboard/counters'
                                         }>
                                         Counters
-                                    </NavLink>
-                                    <NavLink
-                                        href="/dashboard/distributor"
-                                        active={
-                                            usePathname() ===
-                                            '/dashboard/distributor'
-                                        }>
-                                        Ticket's distributor
-                                    </NavLink>
-                                    <NavLink
-                                        href="/dashboard/waiting-list"
-                                        active={
-                                            usePathname() ===
-                                            '/dashboard/waiting-list'
-                                        }>
-                                        Waiting list
                                     </NavLink>
                                 </>
                             ) : (

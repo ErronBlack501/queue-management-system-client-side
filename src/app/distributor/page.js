@@ -7,8 +7,6 @@ import {
     CardBody,
     CardFooter,
     CardHeader,
-    Select,
-    SelectItem,
     Spinner,
 } from '@nextui-org/react'
 import useSWR from 'swr'

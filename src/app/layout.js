@@ -11,7 +11,7 @@ const montSerratFont = Montserrat({
 const RootLayout = ({ children }) => {
     return (
         <html lang="en" className={`light ${montSerratFont.className}`}>
-            <body className="antialiased">
+            <body className="antialiased bg-gray-100">
                 <ToastProvider>
                     <NextUIProvider>{children}</NextUIProvider>
                 </ToastProvider>

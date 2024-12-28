@@ -10,29 +10,48 @@ import Header from '@/app/(app)/Header'
 
 const WaitingList = () => {
     const echo = useEcho()
-    const {
-        data,
-        mutate,
-        error,
-        isLoading,
-    } = useSWR('/api/v1/queue', async () => {
-        try {
-            const res = await axios.get('/api/v1/queue')
-            return res.data
-        } catch (error) {
-            if (error.response?.status !== 409) throw error
+    const { data, mutate, error, isLoading } = useSWR(
+        '/api/v1/queue',
+        async () => {
+            try {
+                const res = await axios.get('/api/v1/queue')
+                return res.data
+            } catch (error) {
+                if (error.response?.status !== 409) throw error
+            }
+        },
+    )
+
+    const speakMessage = text => {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text)
+            utterance.lang = 'en-US'
+            utterance.rate = 1
+            utterance.pitch = 1
+            window.speechSynthesis.speak(utterance)
+        } else {
+            showToast(
+                'error',
+                'SpeechSynthesis is not supported in this browser.',
+            )
         }
-    })
+    }
 
     useEffect(() => {
         if (echo) {
-            echo.private('notifications').listen('TicketCreatedEvent', () => {
-                showToast('success', 'A new ticket has been created.')
-                mutate()
-            }).listen('TicketHandledEvent', () => {
-                showToast('success', 'Waiting list updated.')
-                mutate()
-            })
+            echo.channel('client-channel')
+                .listen('TicketCreatedEvent', () => {
+                    showToast('success', 'A new ticket has been created.')
+                    mutate()
+                })
+                .listen('TicketProcessingStartedEvent', e => {
+                    speakMessage(e.message)
+                    showToast('info', e.message)
+                })
+                .listen('TicketHandledEvent', () => {
+                    showToast('success', 'Waiting list updated.')
+                    mutate()
+                })
         }
     }, [echo])
 
@@ -58,10 +77,13 @@ const WaitingList = () => {
                         <h2 className="text-2xl font-bold text-blue-600 mb-4">
                             Now Serving
                         </h2>
-                        <Card variant="bordered" className="inline-block shadow-md w-80 mx-auto">
+                        <Card
+                            variant="bordered"
+                            className="inline-block shadow-md w-80 mx-auto">
                             <CardHeader>
                                 <h4 className="text-blue-500">
-                                    Ticket #{data.nowServingTicket.ticket_number}
+                                    Ticket #
+                                    {data.nowServingTicket.ticket_number}
                                 </h4>
                             </CardHeader>
                             <CardBody>

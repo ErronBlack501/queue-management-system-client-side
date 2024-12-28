@@ -35,7 +35,7 @@ import Link from 'next/link'
 import { showToast } from '@/utils/toastHelper'
 
 const columns = [
-    { uid: 'id', name: 'ID EMPLOYEE' },
+    { uid: 'id', name: 'STAFF NUMBER' },
     { uid: 'name', name: 'EMPLOYEE NAME' },
     { uid: 'email', name: 'EMPLOYEE EMAIL' },
     { uid: 'counterNumber', name: 'COUNTER NUMBER' },

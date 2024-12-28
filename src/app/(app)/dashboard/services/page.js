@@ -43,7 +43,7 @@ import InputError from '@/components/InputError'
 import { showToast } from '@/utils/toastHelper'
 
 const columns = [
-    { uid: 'id', name: 'ID SERVICE' },
+    { uid: 'id', name: 'CODE SERVICE' },
     { uid: 'serviceName', name: 'SERVICE NAME' },
     { uid: 'serviceDescription', name: 'SERVICE DESCRIPTION' },
     { uid: 'estimatedDuration', name: 'ESTIMATED DURATION' },
