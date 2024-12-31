@@ -9,10 +9,12 @@ import {
     CardHeader,
     Spinner,
 } from '@nextui-org/react'
+import ReactPDF from '@react-pdf/renderer'
 import useSWR from 'swr'
 import { axios } from '@/lib/axios'
 import { showToast } from '@/utils/toastHelper'
 import { useState } from 'react'
+import TicketPdf from '@/components/TicketPdf'
 
 const Distributor = () => {
     const [selectedService, setSelectedService] = useState(null)
@@ -45,15 +47,30 @@ const Distributor = () => {
 
         axios
             .post('/api/v1/tickets', data)
-            .then(() => {
+            .then(async response => {
+                const { newTicket, ticketsBefore } = response.data
                 showToast(
                     'success',
                     'The ticket has been created successfully.',
                 )
                 setSelectedService(null)
+                const blob = await ReactPDF.pdf(
+                    <TicketPdf
+                        ticket={newTicket}
+                        ticketsBefore={ticketsBefore}
+                    />,
+                ).toBlob()
+
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                link.download = `ticket_${newTicket.ticketNumber}.pdf`
+                link.click()
+
+                URL.revokeObjectURL(url)
             })
             .catch(error => {
-                if (error.response.status !== 422) throw error
+                if (error.response?.status !== 422) throw error
                 setErrors(error.response.data.errors)
             })
     }
@@ -92,13 +109,18 @@ const Distributor = () => {
                             ))}
                         </div>
                     </CardBody>
-                    <CardFooter className='flex justify-center items-center gap-x-5'>
+                    <CardFooter className="flex justify-center items-center gap-x-5">
                         <Button
                             type="reset"
                             onClick={() => setSelectedService(null)}>
                             Reset
                         </Button>
-                        <Button isDisabled={selectedService == null} type="submit" color='primary'>Create</Button>
+                        <Button
+                            isDisabled={selectedService == null}
+                            type="submit"
+                            color="primary">
+                            Create
+                        </Button>
                     </CardFooter>
                 </Card>
             </form>
