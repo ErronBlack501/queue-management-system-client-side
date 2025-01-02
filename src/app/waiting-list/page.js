@@ -24,11 +24,16 @@ const WaitingList = () => {
 
     const speakMessage = text => {
         if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text)
-            utterance.lang = 'en-US'
-            utterance.rate = 1
-            utterance.pitch = 1
-            window.speechSynthesis.speak(utterance)
+            for (let i = 0; i < 3; i++) {
+                const utterance = new SpeechSynthesisUtterance(text)
+                utterance.lang = 'fr-FR'
+                utterance.rate = 1
+                utterance.pitch = 1
+
+                setTimeout(() => {
+                    window.speechSynthesis.speak(utterance)
+                }, i * 2000)
+            }
         } else {
             showToast(
                 'error',
@@ -44,7 +49,7 @@ const WaitingList = () => {
                     showToast('success', 'A new ticket has been created.')
                     mutate()
                 })
-                .listen('TicketProcessingStartedEvent', e => {
+                .listen('CallingClientEvent', e => {
                     speakMessage(e.message)
                     showToast('info', e.message)
                 })

@@ -115,7 +115,21 @@ const Tickets = () => {
     }, [echo])
 
     const csrf = () => axios.get('/sanctum/csrf-cookie')
-
+    const callingClient = async () => {
+        await csrf()
+        axios
+            .get('/api/v1/tickets/ticket-call')
+            .then(() => {
+                showToast(
+                    'success',
+                    'Calling the client...',
+                )
+            })
+            .catch(error => {
+                if (error.response.status !== 422) throw error
+                showToast('error', error.response.data.errors)
+            })
+    }
     const updateState = async ticketData => {
         await csrf()
         axios
@@ -327,6 +341,7 @@ const Tickets = () => {
                                             {user.counter.counter_status}
                                         </div>
                                         <Button
+                                            onClick={callingClient}
                                             color="secondary"
                                             isDisabled={isDisabled}>
                                             Call

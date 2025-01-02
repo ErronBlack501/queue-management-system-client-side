@@ -80,6 +80,14 @@ const Navigation = ({ user }) => {
                                         }>
                                         Counters
                                     </NavLink>
+                                    <NavLink
+                                        href="/dashboard/ticketHistories"
+                                        active={
+                                            usePathname() ===
+                                            '/dashboard/ticketHistories'
+                                        }>
+                                        Ticket-Histories
+                                    </NavLink>
                                 </>
                             ) : (
                                 <>
@@ -90,14 +98,6 @@ const Navigation = ({ user }) => {
                                             '/dashboard/pending-tickets'
                                         }>
                                         Pending Tickets
-                                    </NavLink>
-                                    <NavLink
-                                        href="/dashboard/ticketHistories"
-                                        active={
-                                            usePathname() ===
-                                            '/dashboard/ticketHistories'
-                                        }>
-                                        Ticket-Histories
                                     </NavLink>
                                 </>
                             )}

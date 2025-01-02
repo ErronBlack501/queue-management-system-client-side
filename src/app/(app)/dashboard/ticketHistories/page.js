@@ -30,7 +30,6 @@ import { EyeIcon } from '@/components/EyeIcon'
 import { VerticalDotsIcon } from '@/components/VerticalDotsIcon'
 // import { showToast } from '@/utils/toastHelper'
 // import { useEcho } from '@/hooks/echo'
-import { useAuth } from '@/hooks/auth'
 
 const columns = [
     { uid: 'id', name: 'CODE TICKET' },
@@ -39,14 +38,12 @@ const columns = [
     { uid: 'processed_at', name: 'PROCESSED AT' },
     { uid: 'completed_at', name: 'COMPLETED AT' },
     { uid: 'canceled_at', name: 'CANCELED AT' },
-    { uid: 'processing_duration', name: 'PROCESSING DURATION' },
     { uid: 'created_at', name: 'CREATED AT' },
     { uid: 'updated_at', name: 'UPDATED AT' },
     { uid: 'actions', name: 'ACTIONS' },
 ]
 
 const TicketHistories = () => {
-    const { user } = useAuth()
     const [selectedTicket, setSelectedTicket] = useState(null)
     const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure()
     const [selectedKeys, setSelectedKeys] = useState(new Set([]))
@@ -55,23 +52,14 @@ const TicketHistories = () => {
     const query = qs.stringify(
         {
             filters: {
-                $and: [
-                    {
-                        counter_id: {
-                            $eq: user.counter.id,
-                        },
-                    },
-                    {
-                        ticket_status: {
-                            $ne: 'waiting',
-                        },
-                    },
-                ],
+                ticket_status: {
+                    $ne: 'waiting',
+                },
             },
         },
         { encodeValuesOnly: true },
     )
-    // const echo = useEcho()
+
     const iconClasses =
         'text-xl text-default-500 pointer-events-none flex-shrink-0'
 
@@ -88,26 +76,6 @@ const TicketHistories = () => {
             }),
     )
 
-    /*useEffect(() => {
-        if (echo) {
-            echo.private('notifications').listen(
-                'TicketCreatedEvent',
-                ({ service_id, counter_id }) => {
-                    if (
-                        service_id === user.counter.service_id &&
-                        counter_id === user.counter.id
-                    ) {
-                        showToast(
-                            'success',
-                            'A new ticket has been assigned to you.',
-                        )
-                        mutate()
-                    }
-                },
-            )
-        }
-    }, [echo])
-*/
     const onDispose = () => {
         setSelectedTicket(null)
         setModalPurpose('')
