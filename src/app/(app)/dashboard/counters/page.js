@@ -300,11 +300,7 @@ const Counters = () => {
                                     {column => (
                                         <TableColumn
                                             key={column.uid}
-                                            align={
-                                                column.uid === 'actions'
-                                                    ? 'center'
-                                                    : 'start'
-                                            }>
+                                            align='center'>
                                             {column.name}
                                         </TableColumn>
                                     )}

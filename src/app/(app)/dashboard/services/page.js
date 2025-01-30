@@ -46,7 +46,6 @@ const columns = [
     { uid: 'id', name: 'CODE SERVICE' },
     { uid: 'serviceName', name: 'SERVICE NAME' },
     { uid: 'serviceDescription', name: 'SERVICE DESCRIPTION' },
-    { uid: 'estimatedDuration', name: 'ESTIMATED DURATION' },
     { uid: 'isActive', name: 'IS ACTIVE ?' },
     { uid: 'createdAt', name: 'CREATED AT' },
     { uid: 'updatedAt', name: 'UPDATED AT' },
@@ -333,11 +332,9 @@ const Services = () => {
             case 'id':
                 return <div className="text-center">{cellValue}</div>
             case 'serviceName':
-                return <div>{cellValue}</div>
+                return <div className="text-center">{cellValue}</div>
             case 'serviceDescription':
                 return <div className="whitespace-pre-wrap">{cellValue}</div>
-            case 'estimatedDuration':
-                return <div className="text-center">{cellValue || '?'}</div>
             case 'isActive':
                 return (
                     <div className="flex justify-center">
@@ -466,11 +463,7 @@ const Services = () => {
                                     {column => (
                                         <TableColumn
                                             key={column.uid}
-                                            align={
-                                                column.uid === 'actions'
-                                                    ? 'center'
-                                                    : 'start'
-                                            }>
+                                            align='center'>
                                             {column.name}
                                         </TableColumn>
                                     )}
